@@ -1,9 +1,21 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { NovelConfig, OutlineItem } from "../types";
 
-// Initialize Gemini Client
-// We use process.env.API_KEY as strictly required.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Initialize Gemini Client Lazily
+// This prevents the app from crashing on startup if the API key is missing or during build time.
+let ai: GoogleGenAI | null = null;
+
+const getAiClient = () => {
+  if (!ai) {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      console.error("API Key is missing. Please check your environment variables.");
+      throw new Error("API Key is not configured.");
+    }
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
+};
 
 // We use the requested Gemini 3 Pro Preview model for complex creative writing
 const MODEL_NAME = 'gemini-3-pro-preview';
@@ -30,7 +42,8 @@ export const generateNovelOutline = async (config: NovelConfig): Promise<Outline
   `;
 
   try {
-    const response = await ai.models.generateContent({
+    const client = getAiClient();
+    const response = await client.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
       config: {
@@ -91,7 +104,8 @@ export const generateChapterContentStream = async (
   `;
 
   try {
-    const stream = await ai.models.generateContentStream({
+    const client = getAiClient();
+    const stream = await client.models.generateContentStream({
       model: MODEL_NAME,
       contents: prompt,
       config: {
