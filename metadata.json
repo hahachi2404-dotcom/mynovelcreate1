@@ -1,0 +1,5 @@
+{
+  "name": "InkWeaver AI - Gemini 3 小说家",
+  "description": "一个高级AI写作助手，能够使用Gemini 3引擎根据关键词生成结构化、章节式的小说。",
+  "requestFramePermissions": []
+}
