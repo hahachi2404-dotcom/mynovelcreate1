@@ -35,8 +35,9 @@ function App() {
       }
       setViewState('writing');
     } catch (error) {
-      alert("生成大纲失败，请重试。");
       console.error(error);
+      const errorMessage = error instanceof Error ? error.message : "未知错误";
+      alert(`生成大纲失败: ${errorMessage}`);
     } finally {
       setIsGeneratingOutline(false);
     }
@@ -63,7 +64,7 @@ function App() {
       if (chapterIndex > 0) {
         const prevChap = chapters[chapterIndex - 1];
         if (prevChap.content) {
-            // Take the last 500 chars as context roughly
+            // Take the last 1000 chars as context roughly
             previousContext = prevChap.content.slice(-1000);
         }
       }
@@ -94,7 +95,8 @@ function App() {
 
     } catch (error) {
       console.error("Error generating chapter:", error);
-      alert("生成章节内容失败。");
+      const errorMessage = error instanceof Error ? error.message : "未知错误";
+      alert(`生成章节内容失败: ${errorMessage}`);
       setChapters(prev => prev.map(c => 
         c.id === currentChapterId ? { ...c, isGenerating: false } : c
       ));

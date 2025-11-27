@@ -10,7 +10,7 @@ const getAiClient = () => {
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
       console.error("API Key is missing. Please check your environment variables.");
-      throw new Error("API Key is not configured.");
+      throw new Error("API Key is not configured. Please add API_KEY to your environment variables.");
     }
     ai = new GoogleGenAI({ apiKey });
   }
@@ -59,15 +59,17 @@ export const generateNovelOutline = async (config: NovelConfig): Promise<Outline
             required: ["title", "summary"]
           }
         },
-        // Using thinking budget to ensure high quality plot coherence
-        thinkingConfig: { thinkingBudget: 2048 } 
+        // Removed thinkingConfig for outline generation to ensure JSON structure stability
       }
     });
 
     const text = response.text;
     if (!text) throw new Error("No content generated from Gemini.");
     
-    return JSON.parse(text) as OutlineItem[];
+    // Robustly clean the output: remove markdown code fences if present
+    const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    return JSON.parse(cleanedText) as OutlineItem[];
   } catch (error) {
     console.error("Error generating outline:", error);
     throw error;
